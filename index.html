@@ -4,153 +4,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b0b0d">
-  <title>D35</title>
+  <title>Mi diario</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
 </head>
 <body>
 
-  <main id="lockScreen" class="lock-screen">
-    <div class="lock-card">
+  <section id="lockScreen" class="lock-screen">
+    <div class="safe">
+      <div class="safe-top">
+        <span>MI DIARIO</span>
+        <span class="light"></span>
+      </div>
 
-      <div class="eyebrow">veamos</div>
+      <div class="safe-door">
+        <div class="safe-handle"></div>
 
-      <div class="safe">
-        <div class="safe-door">
-          <div class="safe-wheel">
-            <span></span>
-          </div>
-          <div class="safe-handle"></div>
+        <div class="lock-content">
+          <div class="star">✦</div>
+          <h1>Un lugar solo mío</h1>
+          <p>Introduce tu código para entrar</p>
+
+          <form id="pinForm">
+            <input
+              id="pinInput"
+              type="password"
+              inputmode="numeric"
+              maxlength="4"
+              pattern="[0-9]{4}"
+              placeholder="••••"
+              autocomplete="off"
+              required
+            >
+            <button type="submit">Desbloquear</button>
+            <p id="pinMessage" class="message"></p>
+          </form>
         </div>
       </div>
-
-      <h1>D35</h1>
-
-      <p class="lock-copy">
-       Veamos hastá cuánto necesito contar
-      </p>
-
-      <form id="loginForm" class="login-form">
-
-        <label for="email">Correo electrónico</label>
-        <input
-          id="email"
-          type="email"
-          placeholder="Tu correo"
-          autocomplete="username"
-          required
-        >
-
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          type="password"
-          placeholder="Tu contraseña"
-          autocomplete="current-password"
-          required
-        >
-
-        <button class="primary-button" type="submit">
-          Desbloquear diario
-        </button>
-
-        <p id="authMessage" class="message"></p>
-      </form>
-
-      <p class="small-note">Un pequeño refugio para mis pensamientos.</p>
     </div>
-  </main>
+  </section>
 
-
-  <!-- DIARIO -->
   <main id="diaryScreen" class="diary-screen hidden">
-
-    <header class="topbar">
-      <a class="brand" href="#">✦ Entre líneas</a>
-
-      <div class="top-actions">
-        <span id="userLabel" class="user-label"></span>
-        <button id="logoutButton" class="text-button">
-          Cerrar diario
-        </button>
+    <header class="header">
+      <div>
+        <span class="eyebrow">MI ESPACIO PERSONAL</span>
+        <h1>Mi diario</h1>
       </div>
+      <button id="closeDiary" class="close-button">Cerrar diario</button>
     </header>
 
-    <div class="workspace">
-
+    <div class="layout">
       <aside class="sidebar">
-
-        <div class="side-heading">
-          <span class="eyebrow">MI HISTORIAL</span>
-
-          <button id="newEntryButton" class="new-button">
-            ＋ Nueva página
-          </button>
-        </div>
-
-        <div id="entryList" class="entry-list">
-          <p class="empty-list">Tus páginas aparecerán aquí.</p>
-        </div>
-
-        <p class="sidebar-foot">
-          Lo que escribes aquí, se queda aquí.
-        </p>
+        <button id="newPage" class="new-button">+ Nueva página</button>
+        <h2>Mis páginas</h2>
+        <div id="entriesList" class="entries-list"></div>
       </aside>
 
+      <section class="paper-area">
+        <article class="paper">
+          <input
+            id="entryTitle"
+            class="entry-title"
+            type="text"
+            maxlength="100"
+            placeholder="Título de esta página..."
+          >
 
-      <!-- HOJA DE ESCRITURA -->
-      <section class="writing-area">
+          <textarea
+            id="entryContent"
+            class="entry-content"
+            placeholder="Querido diario..."
+          ></textarea>
 
-        <div class="paper-wrap">
-          <div class="paper">
-
-            <div class="paper-top">
-              <span class="paper-label">MI DIARIO</span>
-              <time id="entryDate"></time>
-            </div>
-
-            <input
-              id="entryTitle"
-              class="entry-title"
-              type="text"
-              maxlength="100"
-              placeholder="Ponle un título a este día..."
-            >
-
-            <textarea
-              id="entryBody"
-              class="lined-writing"
-              placeholder="Querido diario...
-
-Escribe aquí todo lo que necesites sacar de tu corazón."
-              spellcheck="true"
-            ></textarea>
-
-            <div class="paper-bottom">
-              <span id="saveStatus">Nueva página</span>
-
-              <button id="deleteButton" class="delete-button hidden">
-                Eliminar página
-              </button>
-            </div>
-
-          </div>
-        </div>
-
-        <p class="privacy-note">
-          No tienes que escribir bonito. Solo tienes que escribir.
-        </p>
-
+          <footer class="paper-footer">
+            <span id="saveStatus">Tus palabras estarán aquí.</span>
+            <button id="deletePage" class="delete-button">Eliminar página</button>
+          </footer>
+        </article>
       </section>
-
     </div>
   </main>
 
-  <script type="module" src="app.js"></script>
 </body>
 </html>
