@@ -1,0 +1,486 @@
+
+:root {
+  --black: #0b0b0d;
+  --red: #a51f2b;
+  --red-light: #c43b46;
+  --paper: #fffefa;
+  --green-line: rgba(105, 164, 119, 0.46);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--black);
+  color: #f8f3f0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+button, input, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* CAJA FUERTE */
+
+.lock-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      #351318,
+      #171012 40%,
+      #09090b 78%
+    );
+}
+
+.lock-card {
+  width: min(100%, 390px);
+  text-align: center;
+  padding: 34px 28px;
+  border: 1px solid rgba(190, 66, 75, 0.32);
+  background: rgba(10, 10, 12, 0.76);
+  box-shadow: 0 25px 90px #0009;
+  border-radius: 5px;
+}
+
+.eyebrow {
+  color: #c66b70;
+  font: 10px Arial, sans-serif;
+  letter-spacing: 0.24em;
+}
+
+.safe {
+  width: 142px;
+  height: 142px;
+  margin: 25px auto 19px;
+  border-radius: 50%;
+  padding: 10px;
+  background: linear-gradient(145deg, #6f1822, #171013, #8f2932);
+  box-shadow: 0 0 0 1px #c04c55, 0 15px 40px #0009;
+}
+
+.safe-door {
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #4e2529;
+  background: radial-gradient(circle at 35% 30%, #4a3435, #171416 68%);
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.safe-wheel {
+  width: 58px;
+  height: 58px;
+  border: 4px solid #9b7370;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 4px #302326;
+}
+
+.safe-wheel span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a52d37;
+  box-shadow: 0 0 12px #c43b46;
+}
+
+.safe-handle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  border: 3px solid #9b7370;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+h1 {
+  margin: 0;
+  font: italic 500 42px "Playfair Display", Georgia, serif;
+}
+
+.lock-copy {
+  margin: 12px 0 24px;
+  color: #bcb1b1;
+  font-size: 18px;
+  font-style: italic;
+}
+
+/* FORMULARIO */
+
+.login-form {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.login-form label {
+  margin-top: 5px;
+  color: #d4babb;
+  font: 11px Arial, sans-serif;
+}
+
+.login-form input {
+  width: 100%;
+  border: 1px solid #493034;
+  background: #151113;
+  color: white;
+  border-radius: 3px;
+  padding: 12px;
+  outline: none;
+}
+
+.login-form input:focus {
+  border-color: #b43a45;
+}
+
+.primary-button {
+  border: 0;
+  margin-top: 12px;
+  padding: 13px;
+  color: white;
+  background: linear-gradient(110deg, #8e1b27, #b52e3a);
+  border-radius: 3px;
+}
+
+.primary-button:hover {
+  filter: brightness(1.12);
+}
+
+.message {
+  min-height: 17px;
+  margin: 2px 0;
+  color: #e49aa0;
+  font: 12px Arial, sans-serif;
+  text-align: center;
+}
+
+.small-note {
+  color: #777074;
+  font: 10px Arial, sans-serif;
+  margin-top: 18px;
+}
+
+/* INTERIOR DEL DIARIO */
+
+.diary-screen {
+  min-height: 100vh;
+  background: #0d0c0e;
+}
+
+.topbar {
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4vw;
+  border-bottom: 1px solid #302126;
+  background: #111012;
+}
+
+.brand {
+  color: #f5e9e7;
+  text-decoration: none;
+  font: italic 22px "Playfair Display", serif;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-label {
+  color: #92898b;
+  font: 11px Arial, sans-serif;
+}
+
+.text-button {
+  color: #d78a90;
+  border: 0;
+  background: none;
+  font: 12px Arial, sans-serif;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 255px 1fr;
+  min-height: calc(100vh - 66px);
+}
+
+/* HISTORIAL */
+
+.sidebar {
+  border-right: 1px solid #302126;
+  padding: 28px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-heading {
+  display: grid;
+  gap: 17px;
+}
+
+.new-button {
+  border: 1px solid #8f2933;
+  background: #35151a;
+  color: #f3dfe0;
+  padding: 11px 12px;
+  text-align: left;
+  border-radius: 3px;
+}
+
+.entry-list {
+  margin-top: 22px;
+  display: grid;
+  gap: 5px;
+}
+
+.entry-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #d9ced0;
+  padding: 10px;
+  border-radius: 3px;
+}
+
+.entry-item:hover,
+.entry-item.active {
+  background: #211619;
+  border-color: #49252b;
+}
+
+.entry-item strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.entry-item small {
+  color: #91878a;
+  font: 10px Arial, sans-serif;
+}
+
+.empty-list,
+.sidebar-foot {
+  color: #81787b;
+  font-style: italic;
+  font-size: 15px;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+/* HOJA */
+
+.writing-area {
+  padding: 34px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.paper-wrap {
+  width: min(100%, 790px);
+  filter: drop-shadow(0 18px 35px #0008);
+}
+
+.paper {
+  min-height: min(78vh, 850px);
+  padding: 42px clamp(22px, 6vw, 70px) 22px;
+  background-color: var(--paper);
+  color: #282426;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.paper::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(177, 65, 71, 0.28);
+}
+
+.paper-top {
+  display: flex;
+  justify-content: space-between;
+  color: #777;
+  font: 10px Arial, sans-serif;
+  letter-spacing: 0.13em;
+}
+
+.paper-label {
+  color: #9d333b;
+}
+
+#entryDate {
+  letter-spacing: 0;
+}
+
+.entry-title {
+  margin: 28px 0 10px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #282426;
+  font: italic 500 30px "Playfair Display", serif;
+  width: 100%;
+}
+
+.entry-title::placeholder {
+  color: #aaa3a2;
+}
+
+.lined-writing {
+  flex: 1;
+  width: 100%;
+  min-height: 480px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  color: #302b2d;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    var(--green-line) 32px,
+    transparent 33px
+  );
+  background-position: 0 4px;
+  line-height: 33px;
+  padding: 0;
+  font: italic 21px/33px "Cormorant Garamond", Georgia, serif;
+}
+
+.lined-writing::placeholder {
+  color: #aaa5a2;
+}
+
+.paper-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 15px;
+  color: #8a8582;
+  font: 10px Arial, sans-serif;
+}
+
+.delete-button {
+  border: 0;
+  background: none;
+  color: #a43a43;
+  font: 11px Arial, sans-serif;
+}
+
+.privacy-note {
+  color: #777074;
+  font-style: italic;
+  font-size: 15px;
+  margin: 16px 0 0;
+}
+
+/* CELULARES */
+
+@media (max-width: 700px) {
+  .topbar {
+    padding: 0 17px;
+    height: 58px;
+  }
+
+  .brand {
+    font-size: 19px;
+  }
+
+  .user-label {
+    display: none;
+  }
+
+  .workspace {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid #302126;
+    padding: 15px 16px;
+  }
+
+  .side-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .new-button {
+    padding: 9px 11px;
+  }
+
+  .entry-list {
+    display: flex;
+    overflow-x: auto;
+    margin-top: 12px;
+  }
+
+  .entry-item {
+    min-width: 145px;
+  }
+
+  .sidebar-foot {
+    display: none;
+  }
+
+  .writing-area {
+    padding: 18px 10px 24px;
+  }
+
+  .paper {
+    min-height: 72vh;
+    padding: 29px 24px 17px 35px;
+  }
+
+  .paper::before {
+    left: 17px;
+  }
+
+  .entry-title {
+    font-size: 25px;
+    margin-top: 22px;
+  }
+
+  .lined-writing {
+    min-height: 55vh;
+    font-size: 19px;
+  }
+
+  .privacy-note {
+    text-align: center;
+  }
+}
