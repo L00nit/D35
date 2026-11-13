@@ -1,3 +1,4 @@
+
 :root {
   --black: #100d0e;
   --red: #8e2636;
@@ -25,6 +26,12 @@ button, input, textarea {
 
 button {
   cursor: pointer;
+  transition: all .25s ease;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 
 .hidden {
@@ -50,7 +57,7 @@ button {
   text-align: center;
   color: #fff;
   border: 1px solid #69303a;
-  border-radius: 12px;
+  border-radius: 14px;
   background: linear-gradient(145deg, #211719, #120f10);
   box-shadow: 0 25px 80px #0009, inset 0 0 30px #8e26361a;
 }
@@ -65,6 +72,7 @@ button {
   border-radius: 50%;
   color: #d77b83;
   font-size: 28px;
+  box-shadow: 0 0 22px #8e263633;
 }
 
 .eyebrow {
@@ -89,36 +97,100 @@ button {
   font-size: 14px;
 }
 
-#pinInput {
+/* BOTONES DE ACCESO */
+
+#accessOptions,
+#joinForm,
+#createdCode {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#accessOptions button,
+#joinForm button,
+#createdCode button {
   width: 100%;
+  min-height: 48px;
+  padding: 13px 18px;
+  border-radius: 7px;
+  font-size: 13px;
+  letter-spacing: .5px;
+}
+
+#createDiary,
+#joinForm button[type="submit"],
+#continueButton {
+  color: #fff;
+  border: 1px solid #a74452;
+  background: linear-gradient(135deg, #a13748, #76202f);
+  box-shadow: 0 5px 18px #8e263633;
+}
+
+#createDiary:hover,
+#joinForm button[type="submit"]:hover,
+#continueButton:hover {
+  background: linear-gradient(135deg, #c05260, #912b3b);
+  box-shadow: 0 7px 24px #a83c4c55;
+  transform: translateY(-2px);
+}
+
+#showJoin,
+#backButton,
+#copyCode {
+  color: #d9bfc2;
+  border: 1px solid #624047;
+  background: #211719;
+}
+
+#showJoin:hover,
+#backButton:hover,
+#copyCode:hover {
+  color: white;
+  border-color: #b74755;
+  background: #342126;
+  transform: translateY(-2px);
+}
+
+#joinForm input {
+  width: 100%;
+  min-height: 50px;
   padding: 13px;
   color: white;
   text-align: center;
-  letter-spacing: 15px;
-  font-size: 24px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
   border: 1px solid #674047;
-  border-radius: 6px;
+  border-radius: 7px;
   outline: none;
   background: #0d0b0c;
 }
 
-#pinInput:focus {
+#joinForm input:focus {
   border-color: #c56b76;
+  box-shadow: 0 0 0 3px #b7475522;
 }
 
-#pinForm button {
-  width: 100%;
-  margin-top: 16px;
-  padding: 14px;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  background: var(--red);
-  transition: background .2s;
+#createdCode {
+  color: #cbbabb;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-#pinForm button:hover {
-  background: var(--red-light);
+#createdCode p {
+  margin: 5px 0;
+}
+
+#codeDisplay {
+  margin: 10px 0;
+  padding: 15px 8px;
+  color: #f0b5bb;
+  font: 600 23px Arial, sans-serif;
+  letter-spacing: 4px;
+  border: 1px dashed #8e4652;
+  border-radius: 7px;
+  background: #100d0e;
+  overflow-wrap: anywhere;
 }
 
 .pin-message {
@@ -154,13 +226,21 @@ button {
 }
 
 .lock-button {
-  padding: 10px 15px;
+  padding: 11px 17px;
   color: #d5bfc1;
   border: 1px solid #624047;
-  border-radius: 5px;
+  border-radius: 7px;
   background: transparent;
   font-size: 12px;
 }
+
+.lock-button:hover {
+  color: white;
+  border-color: #b74755;
+  background: #342126;
+}
+
+/* PANEL LATERAL */
 
 .diary-layout {
   display: grid;
@@ -178,10 +258,16 @@ button {
   width: 100%;
   padding: 13px;
   color: white;
-  border: none;
-  border-radius: 5px;
-  background: var(--red);
+  border: 1px solid #a74452;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #a13748, #76202f);
   text-align: left;
+  box-shadow: 0 4px 14px #8e263622;
+}
+
+.new-page:hover {
+  background: linear-gradient(135deg, #c05260, #912b3b);
+  transform: translateY(-2px);
 }
 
 .new-page span {
@@ -206,10 +292,9 @@ button {
   padding: 12px 10px;
   color: #d9cacc;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: 6px;
   background: transparent;
   text-align: left;
-  cursor: pointer;
 }
 
 .entry-item:hover,
@@ -311,22 +396,33 @@ button {
 }
 
 .delete-button {
-  padding: 8px 11px;
+  padding: 9px 13px;
   color: #a23d49;
   border: 1px solid #d9b8b8;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
   font-size: 11px;
 }
 
 .delete-button:hover {
   color: white;
+  border-color: #a23d49;
   background: #a23d49;
+}
+
+/* EFECTO AL PULSAR */
+
+button:active:not(:disabled) {
+  transform: scale(.98);
 }
 
 /* CELULAR */
 
 @media (max-width: 700px) {
+  .safe {
+    padding: 38px 24px;
+  }
+
   .topbar {
     padding: 15px 18px;
   }
