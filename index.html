@@ -3,13 +3,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi diario</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entre líneas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
 </head>
@@ -18,30 +15,20 @@
   <section id="lockScreen" class="lock-screen">
     <div class="safe">
       <div class="safe-top">
-        <span>MI DIARIO</span>
+        <span>ENTRE LÍNEAS</span>
         <span class="light"></span>
       </div>
-
       <div class="safe-door">
         <div class="safe-handle"></div>
-
         <div class="lock-content">
           <div class="star">✦</div>
-          <h1>Un lugar solo mío</h1>
-          <p>Introduce tu código para entrar</p>
-
+          <h1>Un pequeño refugio</h1>
+          <p>Un lugar para guardar mis pensamientos.</p>
           <form id="pinForm">
-            <input
-              id="pinInput"
-              type="password"
-              inputmode="numeric"
-              maxlength="4"
-              pattern="[0-9]{4}"
-              placeholder="••••"
-              autocomplete="off"
-              required
-            >
-            <button type="submit">Desbloquear</button>
+            <input id="pinInput" type="password" inputmode="numeric"
+              maxlength="4" pattern="[0-9]{4}" placeholder="••••"
+              autocomplete="off" required>
+            <button type="submit">Abrir mi diario</button>
             <p id="pinMessage" class="message"></p>
           </form>
         </div>
@@ -53,7 +40,7 @@
     <header class="header">
       <div>
         <span class="eyebrow">MI ESPACIO PERSONAL</span>
-        <h1>Mi diario</h1>
+        <h1>Entre líneas</h1>
       </div>
       <button id="closeDiary" class="close-button">Cerrar diario</button>
     </header>
@@ -61,28 +48,18 @@
     <div class="layout">
       <aside class="sidebar">
         <button id="newPage" class="new-button">+ Nueva página</button>
-        <h2>Mis páginas</h2>
+        <h2>Mis recuerdos</h2>
         <div id="entriesList" class="entries-list"></div>
       </aside>
 
       <section class="paper-area">
         <article class="paper">
-          <input
-            id="entryTitle"
-            class="entry-title"
-            type="text"
-            maxlength="100"
-            placeholder="Título de esta página..."
-          >
-
-          <textarea
-            id="entryContent"
-            class="entry-content"
-            placeholder="Querido diario..."
-          ></textarea>
-
+          <input id="entryTitle" class="entry-title"
+            maxlength="100" placeholder="Escribe un título...">
+          <textarea id="entryContent" class="entry-content"
+            placeholder="Querido diario..."></textarea>
           <footer class="paper-footer">
-            <span id="saveStatus">Tus palabras estarán aquí.</span>
+            <span id="saveStatus">Aquí comienza tu historia.</span>
             <button id="deletePage" class="delete-button">Eliminar página</button>
           </footer>
         </article>
