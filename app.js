@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 
 import {
@@ -11,6 +12,8 @@ import {
   addDoc,
   getDocs,
   doc,
+  getDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   serverTimestamp,
@@ -33,20 +36,29 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// CONFIGURACIÓN
-const PIN = "2012";
-
+// ESTADO
 let currentUser = null;
+let currentDiaryCode = null;
 let entries = [];
 let currentEntryId = null;
 let saveTimer = null;
-let isSaving = false;
 
 // ELEMENTOS
 const lockScreen = document.getElementById("lockScreen");
 const diaryScreen = document.getElementById("diaryScreen");
-const pinForm = document.getElementById("pinForm");
-const pinInput = document.getElementById("pinInput");
+
+const accessOptions = document.getElementById("accessOptions");
+const createDiaryButton = document.getElementById("createDiary");
+const showJoinButton = document.getElementById("showJoin");
+const joinForm = document.getElementById("joinForm");
+const codeInput = document.getElementById("codeInput");
+const backButton = document.getElementById("backButton");
+
+const createdCode = document.getElementById("createdCode");
+const codeDisplay = document.getElementById("codeDisplay");
+const copyCodeButton = document.getElementById("copyCode");
+const continueButton = document.getElementById("continueButton");
+
 const pinMessage = document.getElementById("pinMessage");
 
 const newPageButton = document.getElementById("newPage");
@@ -57,7 +69,7 @@ const saveStatus = document.getElementById("saveStatus");
 const deleteButton = document.getElementById("deletePage");
 const lockButton = document.getElementById("lockButton");
 
-// INICIAR FIREBASE
+// CONECTAR FIREBASE
 async function initializeDiary() {
   try {
     const result = await signInAnonymously(auth);
@@ -65,54 +77,191 @@ async function initializeDiary() {
   } catch (error) {
     console.error(error);
     pinMessage.textContent = "No se pudo conectar con Firebase.";
+    createDiaryButton.disabled = true;
+    showJoinButton.disabled = true;
   }
 }
 
 await initializeDiary();
 
-// RUTA DE LAS PÁGINAS DEL USUARIO
-function entriesCollection() {
-  return collection(db, "users", currentUser.uid, "entries");
+// GENERAR CÓDIGO ALEATORIO
+function generateCode() {
+  const characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const random = new Uint8Array(12);
+
+  crypto.getRandomValues(random);
+
+  return Array.from(random)
+    .map(number => characters[number % characters.length])
+    .join("");
 }
 
-// ABRIR DIARIO
-pinForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+// RUTA DEL DIARIO
+function diaryDocument() {
+  return doc(db, "diaries", currentDiaryCode);
+}
 
-  if (pinInput.value !== PIN) {
-    pinMessage.textContent = "Código incorrecto.";
-    pinInput.value = "";
-    return;
-  }
+function entriesCollection() {
+  return collection(db, "diaries", currentDiaryCode, "entries");
+}
 
-  if (!currentUser) {
-    pinMessage.textContent = "Espera un momento e inténtalo otra vez.";
-    return;
-  }
-
-  pinMessage.textContent = "";
-
-  try {
-    await loadEntries();
-    lockScreen.classList.add("hidden");
-    diaryScreen.classList.remove("hidden");
-  } catch (error) {
-    console.error(error);
-    pinMessage.textContent = "No se pudieron cargar tus páginas.";
-  }
-
-  pinInput.value = "";
+// MOSTRAR OPCIONES
+showJoinButton.addEventListener("click", () => {
+  accessOptions.classList.add("hidden");
+  joinForm.classList.remove("hidden");
+  codeInput.focus();
 });
 
-// CERRAR VISUALMENTE EL DIARIO
+backButton.addEventListener("click", () => {
+  joinForm.classList.add("hidden");
+  accessOptions.classList.remove("hidden");
+  pinMessage.textContent = "";
+});
+
+// CREAR DIARIO
+createDiaryButton.addEventListener("click", async () => {
+  if (!currentUser) return;
+
+  createDiaryButton.disabled = true;
+  pinMessage.textContent = "Creando tu diario...";
+
+  try {
+    let code;
+    let diaryRef;
+    let exists = true;
+
+    // Evitar códigos repetidos
+    while (exists) {
+      code = generateCode();
+      diaryRef = doc(db, "diaries", code);
+
+      const existing = await getDoc(diaryRef);
+      exists = existing.exists();
+    }
+
+    await setDoc(diaryRef, {
+      ownerUid: currentUser.uid,
+      createdAt: serverTimestamp()
+    });
+
+    currentDiaryCode = code;
+
+    // MIGRAR PÁGINAS ANTIGUAS DEL USUARIO
+    const oldCollection = collection(
+      db,
+      "users",
+      currentUser.uid,
+      "entries"
+    );
+
+    const oldPages = await getDocs(oldCollection);
+
+    for (const oldPage of oldPages.docs) {
+      const data = oldPage.data();
+
+      await addDoc(entriesCollection(), {
+        title: data.title || "",
+        content: data.content || "",
+        createdAt: data.createdAt || serverTimestamp(),
+        updatedAt: data.updatedAt || serverTimestamp()
+      });
+    }
+
+    accessOptions.classList.add("hidden");
+
+    codeDisplay.textContent = code;
+    createdCode.classList.remove("hidden");
+    pinMessage.textContent = "";
+
+  } catch (error) {
+    console.error(error);
+    pinMessage.textContent = "No se pudo crear el diario. Revisa Firebase.";
+  } finally {
+    createDiaryButton.disabled = false;
+  }
+});
+
+// COPIAR CÓDIGO
+copyCodeButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(codeDisplay.textContent);
+    copyCodeButton.textContent = "¡Copiado!";
+  } catch (error) {
+    pinMessage.textContent = "No se pudo copiar. Selecciona el código.";
+  }
+});
+
+// CONTINUAR DESPUÉS DE CREAR
+continueButton.addEventListener("click", async () => {
+  await openDiary();
+});
+
+// ENTRAR CON CÓDIGO
+joinForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!currentUser) {
+    pinMessage.textContent = "Espera a que Firebase se conecte.";
+    return;
+  }
+
+  const code = codeInput.value.trim().toUpperCase();
+
+  if (!/^[A-HJ-NP-Z2-9]{12}$/.test(code)) {
+    pinMessage.textContent = "El código no es válido.";
+    return;
+  }
+
+  pinMessage.textContent = "Buscando diario...";
+
+  try {
+    const diaryRef = doc(db, "diaries", code);
+    const diarySnapshot = await getDoc(diaryRef);
+
+    if (!diarySnapshot.exists()) {
+      pinMessage.textContent = "No encontramos un diario con ese código.";
+      return;
+    }
+
+    currentDiaryCode = code;
+    codeInput.value = "";
+
+    await openDiary();
+
+  } catch (error) {
+    console.error(error);
+    pinMessage.textContent = "No se pudo acceder al diario.";
+  }
+});
+
+// ABRIR DIARIO
+async function openDiary() {
+  try {
+    await loadEntries();
+
+    lockScreen.classList.add("hidden");
+    diaryScreen.classList.remove("hidden");
+
+  } catch (error) {
+    console.error(error);
+    pinMessage.textContent = "No se pudieron cargar las páginas.";
+  }
+}
+
+// CERRAR DIARIO
 lockButton.addEventListener("click", async () => {
   await saveCurrentEntry();
 
   diaryScreen.classList.add("hidden");
   lockScreen.classList.remove("hidden");
 
-  pinInput.value = "";
-  pinMessage.textContent = "";
+  createdCode.classList.add("hidden");
+  joinForm.classList.add("hidden");
+  accessOptions.classList.remove("hidden");
+
+  currentDiaryCode = null;
+  currentEntryId = null;
+  entries = [];
 });
 
 // CARGAR PÁGINAS
@@ -124,7 +273,7 @@ async function loadEntries() {
 
   const snapshot = await getDocs(entriesQuery);
 
-  entries = snapshot.docs.map((document) => ({
+  entries = snapshot.docs.map(document => ({
     id: document.id,
     ...document.data()
   }));
@@ -148,7 +297,7 @@ function renderEntries() {
     return;
   }
 
-  entries.forEach((entry) => {
+  entries.forEach(entry => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "entry-item";
@@ -174,7 +323,7 @@ function renderEntries() {
   });
 }
 
-// FORMATEAR FECHA
+// FECHAS
 function formatDate(value) {
   if (!value) return "Nueva página";
 
@@ -191,8 +340,7 @@ function formatDate(value) {
 
 // SELECCIONAR PÁGINA
 function selectEntry(id) {
-  const entry = entries.find((item) => item.id === id);
-
+  const entry = entries.find(item => item.id === id);
   if (!entry) return;
 
   currentEntryId = id;
@@ -245,6 +393,7 @@ newPageButton.addEventListener("click", async () => {
 
     selectEntry(newEntry.id);
     entryTitle.focus();
+
   } catch (error) {
     console.error(error);
     saveStatus.textContent = "No se pudo crear la página.";
@@ -265,21 +414,19 @@ function scheduleSave() {
   }, 800);
 }
 
-// GUARDAR PÁGINA ACTUAL
+// GUARDAR PÁGINA
 async function saveCurrentEntry() {
   clearTimeout(saveTimer);
 
-  if (!currentEntryId || !currentUser) return;
+  if (!currentEntryId || !currentDiaryCode) return;
 
   const id = currentEntryId;
   const title = entryTitle.value;
   const content = entryContent.value;
 
-  isSaving = true;
-
   try {
     await updateDoc(
-      doc(db, "users", currentUser.uid, "entries", id),
+      doc(db, "diaries", currentDiaryCode, "entries", id),
       {
         title,
         content,
@@ -287,7 +434,7 @@ async function saveCurrentEntry() {
       }
     );
 
-    const entry = entries.find((item) => item.id === id);
+    const entry = entries.find(item => item.id === id);
 
     if (entry) {
       entry.title = title;
@@ -309,11 +456,10 @@ async function saveCurrentEntry() {
 
     saveStatus.textContent = "Guardado.";
     renderEntries();
+
   } catch (error) {
     console.error(error);
     saveStatus.textContent = "Error al guardar. Revisa tu conexión.";
-  } finally {
-    isSaving = false;
   }
 }
 
@@ -333,19 +479,18 @@ deleteButton.addEventListener("click", async () => {
     const id = currentEntryId;
 
     await deleteDoc(
-      doc(db, "users", currentUser.uid, "entries", id)
+      doc(db, "diaries", currentDiaryCode, "entries", id)
     );
 
-    entries = entries.filter((entry) => entry.id !== id);
+    entries = entries.filter(entry => entry.id !== id);
     currentEntryId = null;
-
-    renderEntries();
 
     if (entries.length > 0) {
       selectEntry(entries[0].id);
     } else {
       clearEditor();
     }
+
   } catch (error) {
     console.error(error);
     saveStatus.textContent = "No se pudo eliminar la página.";
