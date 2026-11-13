@@ -3,418 +3,263 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 
 import {
   getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut
+  signInAnonymously
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 import {
   getFirestore,
   collection,
   addDoc,
-  doc,
   getDocs,
+  doc,
   updateDoc,
   deleteDoc,
+  serverTimestamp,
   query,
-  orderBy,
-  serverTimestamp
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-
-// CONFIGURACIÓN DE FIREBASE
-// Sustituye estos valores por los de tu proyecto.
+/* PEGA AQUÍ LOS DATOS DE TU PROYECTO FIREBASE */
 
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "TU_PROYECTO.firebaseapp.com",
   projectId: "TU_PROJECT_ID",
   storageBucket: "TU_PROYECTO.firebasestorage.app",
-  messagingSenderId: "TU_SENDER_ID",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
   appId: "TU_APP_ID"
 };
-
-
-// INICIALIZACIÓN
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const $ = id => document.getElementById(id);
+const PIN = "2012";
+
+const $ = (id) => document.getElementById(id);
 
 let currentUser = null;
-let activeEntryId = null;
+let currentEntry = null;
 let entries = [];
 let saveTimer = null;
 
+const lockScreen = $("lockScreen");
+const diaryScreen = $("diaryScreen");
+const pinInput = $("pinInput");
+const pinMessage = $("pinMessage");
+const titleInput = $("entryTitle");
+const contentInput = $("entryContent");
+const entriesList = $("entriesList");
+const saveStatus = $("saveStatus");
 
-// REFERENCIA A LAS ENTRADAS DEL USUARIO
+/* DESBLOQUEAR */
 
-function entriesRef() {
-  return collection(
-    db,
-    "users",
-    currentUser.uid,
-    "entries"
-  );
-}
+$("pinForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-
-// FORMATO DE FECHA
-
-function formatDate(value) {
-  const date = value?.toDate
-    ? value.toDate()
-    : value
-      ? new Date(value)
-      : new Date();
-
-  return new Intl.DateTimeFormat("es", {
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  }).format(date);
-}
-
-
-// MENSAJES DE ACCESO
-
-function showMessage(message) {
-  $("authMessage").textContent = message;
-}
-
-
-// ABRIR DIARIO
-
-function openDiary(user) {
-  currentUser = user;
-
-  $("lockScreen").classList.add("hidden");
-  $("diaryScreen").classList.remove("hidden");
-
-  $("userLabel").textContent = user.email || "";
-
-  loadEntries();
-}
-
-
-// CERRAR DIARIO
-
-function closeDiary() {
-  $("diaryScreen").classList.add("hidden");
-  $("lockScreen").classList.remove("hidden");
-
-  $("password").value = "";
-
-  currentUser = null;
-  activeEntryId = null;
-  entries = [];
-}
-
-
-// CARGAR ENTRADAS
-
-async function loadEntries() {
-  $("entryList").innerHTML =
-    '<p class="empty-list">Cargando tus páginas...</p>';
-
-  try {
-    const snapshot = await getDocs(
-      query(entriesRef(), orderBy("updatedAt", "desc"))
-    );
-
-    entries = snapshot.docs.map(item => ({
-      id: item.id,
-      ...item.data()
-    }));
-
-    renderEntryList();
-
-    if (entries.length > 0) {
-      selectEntry(entries[0].id);
-    } else {
-      createBlankPage();
-    }
-
-  } catch (error) {
-    console.error(error);
-
-    $("entryList").innerHTML =
-      '<p class="empty-list">No se pudieron cargar tus páginas.</p>';
-  }
-}
-
-
-// MOSTRAR HISTORIAL
-
-function renderEntryList() {
-  const list = $("entryList");
-
-  if (!entries.length) {
-    list.innerHTML =
-      '<p class="empty-list">Aún no tienes páginas.</p>';
+  if (pinInput.value !== PIN) {
+    pinMessage.textContent = "Código incorrecto. Inténtalo otra vez.";
+    pinInput.value = "";
     return;
   }
 
-  list.innerHTML = "";
+  pinMessage.textContent = "Abriendo tu diario...";
 
-  entries.forEach(entry => {
+  try {
+    if (!auth.currentUser) {
+      const credential = await signInAnonymously(auth);
+      currentUser = credential.user;
+    } else {
+      currentUser = auth.currentUser;
+    }
+
+    await openDiary();
+    pinInput.value = "";
+    pinMessage.textContent = "";
+  } catch (error) {
+    console.error(error);
+    pinMessage.textContent = "No se pudo conectar. Revisa Firebase.";
+  }
+});
+
+/* ABRIR DIARIO */
+
+async function openDiary() {
+  lockScreen.classList.add("hidden");
+  diaryScreen.classList.remove("hidden");
+
+  await loadEntries();
+
+  if (entries.length > 0) {
+    selectEntry(entries[0].id);
+  } else {
+    await createEntry();
+  }
+}
+
+/* CARGAR PÁGINAS */
+
+function entriesCollection() {
+  return collection(db, "users", currentUser.uid, "entries");
+}
+
+async function loadEntries() {
+  const q = query(entriesCollection(), orderBy("updatedAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  entries = snapshot.docs.map((item) => ({
+    id: item.id,
+    ...item.data()
+  }));
+
+  renderEntries();
+}
+
+/* MOSTRAR LISTA */
+
+function renderEntries() {
+  entriesList.innerHTML = "";
+
+  entries.forEach((entry) => {
     const button = document.createElement("button");
+    button.className = "entry-item";
+    button.textContent = entry.title || "Página sin título";
 
-    button.className =
-      "entry-item" +
-      (entry.id === activeEntryId ? " active" : "");
+    if (entry.id === currentEntry) {
+      button.classList.add("active");
+    }
 
-    const title = document.createElement("strong");
-    title.textContent = entry.title?.trim() || "Sin título";
-
-    const date = document.createElement("small");
-    date.textContent = formatDate(
-      entry.updatedAt || entry.createdAt
-    );
-
-    button.append(title, date);
-
-    button.addEventListener("click", async () => {
-      clearTimeout(saveTimer);
-      await saveEntry();
-      selectEntry(entry.id);
-    });
-
-    list.append(button);
+    button.addEventListener("click", () => selectEntry(entry.id));
+    entriesList.appendChild(button);
   });
 }
 
-
-// ABRIR UNA PÁGINA
+/* SELECCIONAR PÁGINA */
 
 function selectEntry(id) {
-  const entry = entries.find(item => item.id === id);
-
+  const entry = entries.find((item) => item.id === id);
   if (!entry) return;
 
-  activeEntryId = id;
+  currentEntry = id;
+  titleInput.value = entry.title || "";
+  contentInput.value = entry.content || "";
 
-  $("entryTitle").value = entry.title || "";
-  $("entryBody").value = entry.body || "";
-
-  $("entryDate").textContent = formatDate(
-    entry.createdAt || entry.updatedAt
-  );
-
-  $("saveStatus").textContent = "Guardado";
-
-  $("deleteButton").classList.remove("hidden");
-
-  renderEntryList();
+  saveStatus.textContent = "Página guardada";
+  renderEntries();
 }
 
+/* CREAR PÁGINA */
 
-// CREAR PÁGINA NUEVA
+async function createEntry() {
+  const newEntry = {
+    title: "",
+    content: "",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
 
-function createBlankPage() {
-  activeEntryId = null;
+  const result = await addDoc(entriesCollection(), newEntry);
 
-  $("entryTitle").value = "";
-  $("entryBody").value = "";
+  entries.unshift({
+    id: result.id,
+    title: "",
+    content: ""
+  });
 
-  $("entryDate").textContent = formatDate(new Date());
-
-  $("saveStatus").textContent = "Nueva página";
-
-  $("deleteButton").classList.add("hidden");
-
-  renderEntryList();
-
-  $("entryTitle").focus();
+  selectEntry(result.id);
+  titleInput.focus();
 }
 
-
-// GUARDAR ENTRADA
-
-async function saveEntry() {
-  if (!currentUser) return;
-
-  const title = $("entryTitle").value;
-  const body = $("entryBody").value;
-
-  if (!title.trim() && !body.trim()) {
-    $("saveStatus").textContent = "Nueva página";
-    return;
-  }
-
-  $("saveStatus").textContent = "Guardando...";
-
-  try {
-    const now = serverTimestamp();
-
-    if (activeEntryId) {
-
-      await updateDoc(
-        doc(
-          db,
-          "users",
-          currentUser.uid,
-          "entries",
-          activeEntryId
-        ),
-        {
-          title,
-          body,
-          updatedAt: now
-        }
-      );
-
-    } else {
-
-      const ref = await addDoc(entriesRef(), {
-        title,
-        body,
-        createdAt: now,
-        updatedAt: now
-      });
-
-      activeEntryId = ref.id;
-    }
-
-    const snapshot = await getDocs(
-      query(entriesRef(), orderBy("updatedAt", "desc"))
-    );
-
-    entries = snapshot.docs.map(item => ({
-      id: item.id,
-      ...item.data()
-    }));
-
-    $("saveStatus").textContent = "Guardado";
-
-    $("deleteButton").classList.remove("hidden");
-
-    renderEntryList();
-
-  } catch (error) {
-    console.error(error);
-
-    $("saveStatus").textContent =
-      "No se pudo guardar";
-  }
-}
-
-
-// GUARDADO AUTOMÁTICO
+/* GUARDAR AUTOMÁTICAMENTE */
 
 function scheduleSave() {
-  $("saveStatus").textContent = "Cambios pendientes...";
+  if (!currentEntry) return;
+
+  saveStatus.textContent = "Guardando...";
 
   clearTimeout(saveTimer);
-
-  saveTimer = setTimeout(() => {
-    saveEntry();
-  }, 900);
+  saveTimer = setTimeout(saveEntry, 700);
 }
 
+async function saveEntry() {
+  if (!currentEntry || !currentUser) return;
 
-// INICIAR SESIÓN
-
-$("loginForm").addEventListener("submit", async event => {
-  event.preventDefault();
+  const id = currentEntry;
+  const title = titleInput.value;
+  const content = contentInput.value;
 
   try {
-    showMessage("Abriendo diario...");
-
-    await signInWithEmailAndPassword(
-      auth,
-      $("email").value.trim(),
-      $("password").value
+    await updateDoc(
+      doc(db, "users", currentUser.uid, "entries", id),
+      {
+        title,
+        content,
+        updatedAt: serverTimestamp()
+      }
     );
 
-    showMessage("");
+    const entry = entries.find((item) => item.id === id);
 
+    if (entry) {
+      entry.title = title;
+      entry.content = content;
+    }
+
+    saveStatus.textContent = "Guardado";
+    renderEntries();
   } catch (error) {
     console.error(error);
-
-    showMessage(
-      "No se pudo entrar. Revisa tu correo y contraseña."
-    );
+    saveStatus.textContent = "No se pudo guardar";
   }
-});
+}
 
+titleInput.addEventListener("input", scheduleSave);
+contentInput.addEventListener("input", scheduleSave);
 
-// NUEVA PÁGINA
+/* NUEVA PÁGINA */
 
-$("newEntryButton").addEventListener("click", async () => {
+$("newPage").addEventListener("click", async () => {
   clearTimeout(saveTimer);
-
   await saveEntry();
-
-  createBlankPage();
+  await createEntry();
 });
 
+/* ELIMINAR PÁGINA */
 
-// ESCUCHAR CAMBIOS DE TEXTO
+$("deletePage").addEventListener("click", async () => {
+  if (!currentEntry) return;
 
-$("entryTitle").addEventListener("input", scheduleSave);
-
-$("entryBody").addEventListener("input", scheduleSave);
-
-
-// ELIMINAR PÁGINA
-
-$("deleteButton").addEventListener("click", async () => {
-  if (!activeEntryId) return;
-
-  const confirmed = confirm(
-    "¿Quieres eliminar esta página? Esta acción no se puede deshacer."
-  );
-
+  const confirmed = confirm("¿Quieres eliminar esta página?");
   if (!confirmed) return;
 
   clearTimeout(saveTimer);
 
-  await deleteDoc(
-    doc(
-      db,
-      "users",
-      currentUser.uid,
-      "entries",
-      activeEntryId
-    )
-  );
+  try {
+    await deleteDoc(
+      doc(db, "users", currentUser.uid, "entries", currentEntry)
+    );
 
-  entries = entries.filter(
-    item => item.id !== activeEntryId
-  );
+    entries = entries.filter((item) => item.id !== currentEntry);
+    currentEntry = null;
 
-  activeEntryId = null;
-
-  renderEntryList();
-
-  if (entries.length) {
-    selectEntry(entries[0].id);
-  } else {
-    createBlankPage();
+    if (entries.length > 0) {
+      selectEntry(entries[0].id);
+    } else {
+      await createEntry();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo eliminar la página.");
   }
 });
 
+/* CERRAR DIARIO */
 
-// CERRAR SESIÓN
-
-$("logoutButton").addEventListener("click", async () => {
+$("closeDiary").addEventListener("click", async () => {
   clearTimeout(saveTimer);
-
   await saveEntry();
 
-  await signOut(auth);
-});
-
-
-// COMPROBAR SESIÓN
-
-onAuthStateChanged(auth, user => {
-  if (user) {
-    openDiary(user);
-  } else {
-    closeDiary();
-  }
+  diaryScreen.classList.add("hidden");
+  lockScreen.classList.remove("hidden");
+  pinInput.value = "";
 });
