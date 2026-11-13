@@ -5,46 +5,40 @@
 
 :root {
   --red: #a51e35;
-  --dark-red: #5b101e;
   --green-line: #c5ddc1;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  background: #090909;
+  font-family: Inter, sans-serif;
+  background: #100b0d;
 }
 
-.hidden {
-  display: none !important;
-}
-
-/* CAJA FUERTE */
+.hidden { display: none !important; }
 
 .lock-screen {
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  place-items: center;
   padding: 20px;
-  background: radial-gradient(circle, #351018, #10090b 65%, #050505);
+  background: radial-gradient(circle, #43151f, #16090d 65%, #050505);
 }
 
 .safe {
   width: min(430px, 100%);
   padding: 12px;
   border-radius: 18px;
-  background: linear-gradient(145deg, #555, #171717, #333);
+  background: linear-gradient(145deg, #666, #171717, #333);
   box-shadow: 0 25px 80px #000;
 }
 
 .safe-top {
-  height: 35px;
-  padding: 0 12px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 12px;
   color: #bbb;
   font-size: 10px;
   letter-spacing: 4px;
@@ -54,16 +48,15 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #c51d3c;
+  background: #d32645;
   box-shadow: 0 0 12px #e21e3d;
 }
 
 .safe-door {
   min-height: 440px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   padding: 35px;
   border: 5px solid #292929;
   border-radius: 12px;
@@ -95,9 +88,7 @@ body {
 
 .lock-content h1 {
   margin: 12px 0;
-  font-family: "Dancing Script", cursive;
-  font-size: 39px;
-  font-weight: 600;
+  font: 600 39px "Dancing Script", cursive;
 }
 
 .lock-content > p {
@@ -124,12 +115,9 @@ body {
   letter-spacing: 12px;
 }
 
-#pinInput:focus {
-  border-color: #dc5268;
-}
+#pinInput:focus { border-color: #dc5268; }
 
-#pinForm button,
-.new-button {
+#pinForm button, .new-button {
   padding: 14px;
   border: 0;
   border-radius: 8px;
@@ -145,8 +133,6 @@ body {
   color: #ff8b9a;
   font-size: 12px;
 }
-
-/* DIARIO */
 
 .diary-screen {
   min-height: 100vh;
@@ -171,12 +157,10 @@ body {
 
 .header h1 {
   margin: 5px 0 0;
-  font-family: "Dancing Script", cursive;
-  font-size: 34px;
+  font: 600 36px "Dancing Script", cursive;
 }
 
-.close-button,
-.delete-button {
+.close-button, .delete-button {
   padding: 10px 14px;
   border: 1px solid #70404a;
   border-radius: 7px;
@@ -266,8 +250,7 @@ body {
   background: #e6a4a4;
 }
 
-.entry-title,
-.entry-content {
+.entry-title, .entry-content {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -310,13 +293,8 @@ body {
   color: #a53a46;
 }
 
-/* CELULARES */
-
 @media (max-width: 700px) {
-  .layout {
-    display: flex;
-    flex-direction: column;
-  }
+  .layout { display: flex; flex-direction: column; }
 
   .sidebar {
     padding: 15px;
@@ -324,9 +302,7 @@ body {
     border-bottom: 1px solid #39252a;
   }
 
-  .sidebar h2 {
-    margin-bottom: 10px;
-  }
+  .sidebar h2 { margin-bottom: 10px; }
 
   .entries-list {
     display: flex;
@@ -334,38 +310,24 @@ body {
     padding-bottom: 5px;
   }
 
-  .entry-item {
-    min-width: 135px;
-  }
+  .entry-item { min-width: 135px; }
 
-  .paper-area {
-    padding: 15px 10px;
-  }
+  .paper-area { padding: 15px 10px; }
 
   .paper {
     min-height: 70vh;
     padding: 30px 18px 20px 48px;
   }
 
-  .paper::before {
-    left: 35px;
-  }
+  .paper::before { left: 35px; }
 
-  .entry-content {
-    font-size: 21px;
-  }
+  .entry-content { font-size: 21px; }
 
-  .header {
-    padding: 15px;
-  }
+  .header { padding: 15px; }
 
-  .header h1 {
-    font-size: 29px;
-  }
+  .header h1 { font-size: 29px; }
 
-  .close-button {
-    font-size: 11px;
-  }
+  .close-button { font-size: 11px; }
 
   .paper-footer {
     align-items: flex-start;
